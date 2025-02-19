@@ -11,7 +11,7 @@
 
 ---
 
-## 🚀 Deployment Instructions
+## Deployment Instructions
 
 ### **1️⃣ Clone the Repository**
 ```bash
@@ -19,20 +19,36 @@ git clone https://github.com/your-repo/contextgpt.git
 cd contextgpt
 ```
 
-### **2️⃣ Install Dependencies** (For local non-Docker setup)
+### **2️⃣ Install Dependencies**
 Ensure Python 3.11+ is installed, then run:
 ```bash
 pip install -r requirements.txt
 ```
 
-### **3️⃣ Start with Docker** (Recommended)
+### **3️⃣ Start Services Without Docker**
+You can manually start each service by running the following in separate terminals:
+```bash
+cd document_service && python document_service.py
+```
+```bash
+cd retrieval_service && python retrieval_service.py
+```
+```bash
+cd inference_service && python inference_service.py
+```
+```bash
+cd frontend_service && python frontend_service.py
+```
+Now, open your browser and go to **[http://localhost:5000](http://localhost:5000)**
+
+### **4️⃣ Start With Docker (Recommended)**
 Ensure **Docker** and **Docker Compose** are installed, then run:
 ```bash
 docker-compose up --build
 ```
 This will build and start all services in the background.
 
-### **4️⃣ Access the Frontend**
+### **5️⃣ Access the Frontend**
 Once running, open your browser and go to:
 👉 **[http://localhost:5000](http://localhost:5000)**
 
@@ -89,6 +105,8 @@ To restart with fresh logs:
 ```bash
 docker-compose up --build
 ```
+
+For manual (non-Docker) deployment, stop services using `CTRL+C` in each terminal window.
 
 
 
