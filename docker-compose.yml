@@ -1,0 +1,37 @@
+version: '3.8'
+
+services:
+  document_service:
+    build: ./document_service
+    ports:
+      - "5001:5001"
+    volumes:
+      - ./uploads:/app/uploads
+      - ./chroma_db:/app/chroma_db
+    restart: always
+
+  retrieval_service:
+    build: ./retrieval_service
+    ports:
+      - "5002:5002"
+    depends_on:
+      - document_service
+    restart: always
+
+  inference_service:
+    build: ./inference_service
+    ports:
+      - "5003:5003"
+    depends_on:
+      - retrieval_service
+    restart: always
+
+  frontend_service:
+    build: ./frontend_service
+    ports:
+      - "5000:5000"
+    depends_on:
+      - document_service
+      - retrieval_service
+      - inference_service
+    restart: always
