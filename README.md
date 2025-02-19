@@ -15,7 +15,7 @@
 
 ### **1️⃣ Clone the Repository**
 ```bash
-git clone https://github.com/your-repo/contextgpt.git
+git clone https://github.com/nelabdiel/contextgpt.git
 cd contextgpt
 ```
 
