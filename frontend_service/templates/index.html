@@ -10,7 +10,10 @@
             background-color: #f4f4f9;
             margin: 0;
             padding: 20px;
-            text-align: center;
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            grid-template-rows: auto auto 1fr;
+            gap: 20px;
         }
         h2 {
             color: #333;
@@ -18,18 +21,14 @@
         .container {
             background: white;
             padding: 20px;
-            max-width: 600px;
-            margin: auto;
             border-radius: 10px;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-            margin-bottom: 20px;
         }
         button {
             background-color: #007bff;
             color: white;
             border: none;
             padding: 10px 15px;
-            margin: 10px;
             border-radius: 5px;
             cursor: pointer;
             font-size: 16px;
@@ -39,8 +38,8 @@
         }
         input[type="text"], input[type="file"] {
             padding: 10px;
-            width: 80%;
-            margin: 10px;
+            width: 90%;
+            margin: 10px 0;
             border: 1px solid #ccc;
             border-radius: 5px;
             font-size: 16px;
@@ -50,38 +49,132 @@
             color: #555;
         }
         .output {
-            margin-top: 20px;
             padding: 15px;
             background: #e9ecef;
             border-radius: 5px;
             text-align: left;
         }
+
+        /* Grid Layout */
+        .upload-container {
+            grid-column: 1;
+            grid-row: 1 / span 2;
+        }
+        .references-container {
+            grid-column: 1;
+            grid-row: 3;
+        }
+        .asked-question-container {
+            grid-column: 2;
+            grid-row: 1;
+        }
+        .response-container {
+            grid-column: 2;
+            grid-row: 2;
+        }
+
+        /* Ask a Question Bar (Fixed at Bottom) */
+        .question-bar {
+            position: fixed;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 50%;
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.2);
+            text-align: center;
+        }
     </style>
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            // Restore asked question after page refresh
+            let storedQuestion = localStorage.getItem("askedQuestion");
+            if (storedQuestion) {
+                document.getElementById("askedQuestion").innerText = storedQuestion;
+                document.getElementById("askedQuestionContainer").style.display = "block";
+            }
+
+            // Handle File Upload
+            document.getElementById("uploadForm").addEventListener("submit", function(event) {
+                event.preventDefault();
+
+                let formData = new FormData(this);
+
+                fetch("http://localhost:5001/upload", {
+                    method: "POST",
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById("uploadStatus").innerText = "✅ " + data.message;
+                })
+                .catch(error => {
+                    document.getElementById("uploadStatus").innerText = "❌ Upload failed.";
+                });
+            });
+
+            // Handle Ask Question
+            document.getElementById("questionForm").addEventListener("submit", function(event) {
+                let queryInput = document.getElementById("queryInput").value;
+                localStorage.setItem("askedQuestion", queryInput); // Store question in localStorage
+            });
+        });
+    </script>
 </head>
 <body>
-    <div class="container">
+    <!-- Upload Section (Top Left, 1/3 Width) -->
+    <div class="container upload-container">
         <h2>Document Management</h2>
-        <form action="http://localhost:5001/upload" method="post" enctype="multipart/form-data">
+        <form id="uploadForm">
             <input type="file" name="files" multiple>
             <button type="submit">Upload New Documents</button>
         </form>
+        <p id="uploadStatus"></p>
     </div>
     
-    <div class="container">
-        <h2>Ask a Question</h2>
-        <form action="http://localhost:5000/ask" method="post">
-            <input type="text" name="query" placeholder="Enter your question" required>
-            <button type="submit">Ask</button>
-        </form>
+    <!-- Asked Question (Top Center & Right, 2/3 Width) -->
+    <div id="askedQuestionContainer" class="container asked-question-container" style="display: none;">
+        <h2>Your Question</h2>
+        <div class="output">
+            <p id="askedQuestion"></p>
+        </div>
     </div>
-    
+
+    <!-- AI Response (Below Asked Question, 2/3 Width) -->
     {% if response %}
-    <div class="container">
+    <div class="container response-container">
         <h2>AI Response</h2>
         <div class="output">
             <p>{{ response }}</p>
         </div>
     </div>
     {% endif %}
+
+    <!-- References (Below Upload, 1/3 Width) -->
+    {% if references %}
+    <div class="container references-container">
+        <h2>Source Documents</h2>
+        <ul>
+            {% for ref in references %}
+            <li>
+                <strong>{{ ref.title }}</strong>  
+                (<a href="{{ ref.filepath }}" target="_blank">Open</a>)  
+                <br>
+                <small>Excerpt: "{{ ref.excerpt }}"</small>
+            </li>
+            {% endfor %}
+        </ul>
+    </div>
+    {% endif %}
+
+    <!-- Ask a Question (Fixed at Bottom, Full Width, Centered) -->
+    <div class="question-bar">
+        <form id="questionForm" action="http://localhost:5000/ask" method="post">
+            <input type="text" id="queryInput" name="query" placeholder="Enter your question" required>
+            <button type="submit">Ask</button>
+        </form>
+    </div>
 </body>
 </html>
