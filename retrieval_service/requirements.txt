@@ -1,0 +1,8 @@
+flask
+requests
+PyPDF2
+chromadb
+sentence-transformers
+ollama
+langchain
+flask-cors
